@@ -1,5 +1,6 @@
-package com.reringuy.support.ui.screens
+package com.reringuy.support.presentation.login
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,20 +18,66 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.reringuy.support.helper.OperationHandler
+import com.reringuy.support.helper.rememberFlowWithLifecycle
+import com.reringuy.support.models.data.EmailPassword
+import com.reringuy.support.models.entities.User
+import com.reringuy.support.presentation.components.Loading
+import com.reringuy.support.presentation.login.LoginReducer.LoginState
 
 @Composable
-fun LoginScreen(onLogin: () -> Unit) {
+fun LoginScreenWrapper(
+    viewModel: LoginViewModel = hiltViewModel(),
+    onLogin: () -> Unit,
+) {
+    val context = LocalContext.current
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val effect = rememberFlowWithLifecycle(viewModel.effect)
+
+    LaunchedEffect(effect) {
+        effect.collect {
+            when (it) {
+                LoginReducer.LoginEffects.OnAuthenticated -> onLogin
+                is LoginReducer.LoginEffects.OnError -> {
+                    Toast.makeText(context, "Dados invalidos.", Toast.LENGTH_SHORT)
+                }
+            }
+        }
+    }
+
+    when (state.currentUser) {
+//        Usuario nao encotrado entao fazer login
+        is OperationHandler.Error -> {
+            LoginScreen(state, viewModel::onLogin)
+        }
+//        Usuario encontrado entao chamar biometrics para validar login
+        is OperationHandler.Success<*> -> {
+        }
+        else -> Loading()
+    }
+
+}
+
+@Composable
+fun LoginScreen(
+    state: LoginState,
+    onLogin: (EmailPassword) -> Unit,
+) {
     Column(
         modifier = Modifier
             .background(MaterialTheme.colorScheme.background)
@@ -67,9 +114,8 @@ fun TitleLogin() {
 }
 
 @Composable
-fun FormLogin(onClick: () -> Unit) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+fun FormLogin(onClick: (EmailPassword) -> Unit) {
+    var authData by remember { mutableStateOf(EmailPassword("", "")) }
     var showPassword by remember { mutableStateOf(false) }
     Box(
         modifier = Modifier
@@ -86,14 +132,14 @@ fun FormLogin(onClick: () -> Unit) {
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(
-                    value = email,
-                    onValueChange = { email = it },
+                    value = authData.email,
+                    onValueChange = { authData.email = it },
                     label = { Text(text = "Email") },
                     placeholder = { Text(text = "reringuy@test.com") }
                 )
                 OutlinedTextField(
-                    value = password,
-                    onValueChange = { password = it },
+                    value = authData.password,
+                    onValueChange = { authData.password = it },
                     label = { Text(text = "Senha") },
                     placeholder = { Text(text = "123456") },
                     visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
@@ -107,7 +153,10 @@ fun FormLogin(onClick: () -> Unit) {
                     }
                 )
             }
-            Button(onClick = onClick) {
+            Button(
+                onClick = { onClick(authData) },
+                enabled = authData.isValid()
+            ) {
                 Text(text = "Entrar")
             }
         }
@@ -117,5 +166,15 @@ fun FormLogin(onClick: () -> Unit) {
 @Preview(showBackground = true)
 @Composable
 fun PreviewLoginScreen() {
-    LoginScreen{}
+    val state = LoginState(
+        loading = false,
+        email = "joao.joao@gmail",
+        password = "123",
+        currentUser = OperationHandler.Success(User(
+            id = 1,
+            email = "joao",
+            role = "ADMIN"
+        ))
+    )
+    LoginScreen(state) {  }
 }

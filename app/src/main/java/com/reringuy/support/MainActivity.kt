@@ -26,7 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.reringuy.support.navigation.Destination
-import com.reringuy.support.ui.theme.SupportTheme
+import com.reringuy.support.presentation.theme.SupportTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -1,4 +1,4 @@
-package com.reringuy.support.ui.theme
+package com.reringuy.support.presentation.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
