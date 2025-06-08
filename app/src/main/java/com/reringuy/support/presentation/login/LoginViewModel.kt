@@ -1,5 +1,6 @@
 package com.reringuy.support.presentation.login
 
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.reringuy.support.auth.TokenManager
 import com.reringuy.support.helper.BaseViewModel
@@ -40,9 +41,11 @@ class LoginViewModel @Inject constructor(
         sendEvent(LoginEvents.OnLoading(true))
         viewModelScope.launch {
             authRepository.login(auth).collect {
-                if (it == null)
+                if (it == null) {
+                    Log.d("ble", "deu erro")
                     sendEvent(LoginEvents.LoadUser(OperationHandler.Error("Usuario nao encontrato.")))
-                else{
+                } else {
+                    Log.d("ble", "n deu erro")
                     tokenManager.saveToken(it.token)
                     tokenManager.saveUser(it.user)
                     sendEvent(LoginEvents.LoadUser(OperationHandler.Success(it.user)))
