@@ -5,16 +5,21 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import com.reringuy.support.auth.biometric.BiometricPromptManager
 import com.reringuy.support.presentation.login.LoginScreenWrapper
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class LoginActivity : AppCompatActivity() {
+    private val biometricPromptManager by lazy {
+        BiometricPromptManager(this)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            LoginScreenWrapper {
+            LoginScreenWrapper(biometricPromptManager) {
                 handleOnLogin()
             }
         }

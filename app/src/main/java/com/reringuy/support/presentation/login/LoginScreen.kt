@@ -33,6 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.reringuy.support.auth.biometric.BiometricPromptManager
 import com.reringuy.support.helper.OperationHandler
 import com.reringuy.support.helper.rememberFlowWithLifecycle
 import com.reringuy.support.models.data.EmailPassword
@@ -42,6 +43,7 @@ import com.reringuy.support.presentation.login.LoginReducer.LoginState
 
 @Composable
 fun LoginScreenWrapper(
+    biometricPromptManager: BiometricPromptManager,
     viewModel: LoginViewModel = hiltViewModel(),
     onLogin: () -> Unit,
 ) {
@@ -56,16 +58,18 @@ fun LoginScreenWrapper(
                 is LoginReducer.LoginEffects.OnError -> {
                     Toast.makeText(context, "Dados invalidos.", Toast.LENGTH_SHORT)
                 }
+
+                is LoginReducer.LoginEffects.LoginError -> {
+                    Toast.makeText(context, it.message, Toast.LENGTH_SHORT)
+                }
             }
         }
     }
 
     when (state.currentUser) {
-//        Usuario nao encotrado entao fazer login
         is OperationHandler.Error -> {
             LoginScreen(state, viewModel::onLogin)
         }
-//        Usuario encontrado entao chamar biometrics para validar login
         is OperationHandler.Success<*> -> {
         }
         else -> Loading()
@@ -115,7 +119,8 @@ fun TitleLogin() {
 
 @Composable
 fun FormLogin(onClick: (EmailPassword) -> Unit) {
-    var authData by remember { mutableStateOf(EmailPassword("", "")) }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
     var showPassword by remember { mutableStateOf(false) }
     Box(
         modifier = Modifier
@@ -132,14 +137,14 @@ fun FormLogin(onClick: (EmailPassword) -> Unit) {
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(
-                    value = authData.email,
-                    onValueChange = { authData.email = it },
+                    value = email,
+                    onValueChange = { email = it },
                     label = { Text(text = "Email") },
                     placeholder = { Text(text = "reringuy@test.com") }
                 )
                 OutlinedTextField(
-                    value = authData.password,
-                    onValueChange = { authData.password = it },
+                    value = password,
+                    onValueChange = { password = it },
                     label = { Text(text = "Senha") },
                     placeholder = { Text(text = "123456") },
                     visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
@@ -154,8 +159,8 @@ fun FormLogin(onClick: (EmailPassword) -> Unit) {
                 )
             }
             Button(
-                onClick = { onClick(authData) },
-                enabled = authData.isValid()
+                onClick = { onClick(EmailPassword(email, password)) },
+                enabled = email.isNotBlank() && password.isNotBlank(),
             ) {
                 Text(text = "Entrar")
             }

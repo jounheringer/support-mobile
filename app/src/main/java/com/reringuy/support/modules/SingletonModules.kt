@@ -1,6 +1,7 @@
 package com.reringuy.support.modules
 
 import android.content.Context
+import com.google.gson.Gson
 import com.reringuy.support.auth.TokenManager
 import dagger.Module
 import dagger.Provides
@@ -14,4 +15,7 @@ class SingletonModules {
 
     @Provides
     fun provideTokenManager(@ApplicationContext context: Context) = TokenManager(context)
+
+    @Provides
+    fun provideGson(): Gson = Gson()
 }

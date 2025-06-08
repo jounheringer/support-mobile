@@ -17,8 +17,15 @@ class TokenManager (
 ) {
     companion object {
         val USER_KEY = stringPreferencesKey("user_key")
+        val TOKEN_KEY = stringPreferencesKey("token_key")
     }
     val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "data_store")
+
+    suspend fun saveToken(token: String) {
+        context.dataStore.edit {
+            it[TOKEN_KEY] = token
+        }
+    }
 
     suspend fun saveUser(user: User) {
         context.dataStore.edit {
@@ -32,10 +39,27 @@ class TokenManager (
         }
     }
 
+    fun getCurrentToken(): Flow<String?> {
+        return context.dataStore.data.map {
+            it[TOKEN_KEY]
+        }
+    }
+
     suspend fun clearUser() {
         context.dataStore.edit {
             it.remove(USER_KEY)
         }
+    }
+
+    suspend fun clearToken() {
+        context.dataStore.edit {
+            it.remove(TOKEN_KEY)
+        }
+    }
+
+    suspend fun clearAll() {
+        clearToken()
+        clearUser()
     }
 
 }

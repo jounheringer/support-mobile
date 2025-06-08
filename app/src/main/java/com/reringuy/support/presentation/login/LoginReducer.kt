@@ -11,12 +11,14 @@ class LoginReducer :
         data class OnLoading(val loading: Boolean) : LoginEvents()
         data class OnLogin(val email: String, val password: String) : LoginEvents()
         data class LoadUser(val user: OperationHandler<User>) : LoginEvents()
+        data class HandleLogin(val userLogin: OperationHandler<User>) : LoginEvents()
     }
 
 
     sealed class LoginEffects : Reducer.ViewEffect {
         data class OnError(val message: String) : LoginEffects()
         data object OnAuthenticated : LoginEffects()
+        data class LoginError(val message: String) : LoginEffects()
     }
 
     data class LoginState(
@@ -45,5 +47,10 @@ class LoginReducer :
             email = event.email,
             password = event.password
         ) to OnAuthenticated
+
+        is LoginEvents.HandleLogin -> previousState.copy(currentUser = event.userLogin) to
+                if (event.userLogin is OperationHandler.Error)
+                    LoginEffects.LoginError(event.userLogin.message)
+                else null
     }
 }
