@@ -19,11 +19,7 @@ class LoginViewModel @Inject constructor(
     initialState = LoginReducer.LoginState.initial(),
     reducer = LoginReducer()
 ) {
-    init {
-        loadUser()
-    }
-
-    private fun loadUser() {
+    fun loadUser() {
         sendEvent(LoginEvents.OnLoading(true))
         viewModelScope.launch {
             tokenManager.getCurrentUser().collect {
@@ -31,8 +27,8 @@ class LoginViewModel @Inject constructor(
                     sendEvent(LoginEvents.LoadUser(OperationHandler.Error("Usuario nao encontrato.")))
                 else
                     sendEvent(LoginEvents.LoadUser(OperationHandler.Success(it)))
-                sendEvent(LoginEvents.OnLoading(false))
             }
+            sendEvent(LoginEvents.OnLoading(false))
         }
     }
 

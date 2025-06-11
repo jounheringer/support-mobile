@@ -1,6 +1,14 @@
 package com.reringuy.support.presentation.login
 
+import android.content.Intent
+import android.hardware.biometrics.BiometricManager.Authenticators.BIOMETRIC_STRONG
+import android.hardware.biometrics.BiometricManager.Authenticators.DEVICE_CREDENTIAL
+import android.os.Build
+import android.provider.Settings
+import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,12 +42,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.reringuy.support.auth.biometric.BiometricPromptManager
+import com.reringuy.support.auth.biometric.BiometricResult
 import com.reringuy.support.helper.OperationHandler
 import com.reringuy.support.helper.rememberFlowWithLifecycle
 import com.reringuy.support.models.data.EmailPassword
-import com.reringuy.support.models.entities.User
 import com.reringuy.support.presentation.components.Loading
-import com.reringuy.support.presentation.login.LoginReducer.LoginState
 
 @Composable
 fun LoginScreenWrapper(
@@ -47,18 +54,51 @@ fun LoginScreenWrapper(
     viewModel: LoginViewModel = hiltViewModel(),
     onLogin: () -> Unit,
 ) {
+    val promptResult by biometricPromptManager.promptResult.collectAsStateWithLifecycle(null)
     val context = LocalContext.current
     val state by viewModel.state.collectAsStateWithLifecycle()
     val effect = rememberFlowWithLifecycle(viewModel.effect)
+    val enrollLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult(),
+        onResult = {
+            println("Activity result: $it")
+        }
+    )
+
+    LaunchedEffect(Unit) {
+        viewModel.loadUser()
+    }
+
+    LaunchedEffect(promptResult) {
+        when (promptResult) {
+            is BiometricResult.AuthenticationError -> {
+                Toast.makeText(context, "Erro de autenticação.", Toast.LENGTH_SHORT).show()
+            }
+            BiometricResult.AuthenticationSuccess -> {
+                Toast.makeText(context, "Autenticado com sucesso.", Toast.LENGTH_SHORT).show()
+                onLogin()
+            }
+            BiometricResult.AuthenticationNotSet -> {
+                if (Build.VERSION.SDK_INT >= 30) {
+                    val enrollIntent = Intent(Settings.ACTION_BIOMETRIC_ENROLL).apply {
+                        putExtra(
+                            Settings.EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED,
+                            BIOMETRIC_STRONG or DEVICE_CREDENTIAL
+                        )
+                    }
+                    enrollLauncher.launch(enrollIntent)
+                }
+            }
+            null -> {}
+            else -> {
+                Toast.makeText(context, "Erro de autenticação.", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 
     LaunchedEffect(effect) {
         effect.collect {
             when (it) {
-                LoginReducer.LoginEffects.OnAuthenticated -> onLogin
-                is LoginReducer.LoginEffects.OnError -> {
-                    Toast.makeText(context, "Dados invalidos.", Toast.LENGTH_SHORT)
-                }
-
                 is LoginReducer.LoginEffects.LoginError -> {
                     Toast.makeText(context, it.message, Toast.LENGTH_SHORT)
                 }
@@ -68,9 +108,14 @@ fun LoginScreenWrapper(
 
     when (state.currentUser) {
         is OperationHandler.Error -> {
-            LoginScreen(state, viewModel::onLogin)
+            LoginScreen(viewModel::onLogin)
         }
         is OperationHandler.Success<*> -> {
+            Log.d("prompt", "miau")
+            biometricPromptManager.showBiometricPrompt(
+                title = "Valide identidade",
+                description = "Valide sua identidade para continuar"
+            )
         }
         else -> Loading()
     }
@@ -79,7 +124,6 @@ fun LoginScreenWrapper(
 
 @Composable
 fun LoginScreen(
-    state: LoginState,
     onLogin: (EmailPassword) -> Unit,
 ) {
     Column(
@@ -171,15 +215,5 @@ fun FormLogin(onClick: (EmailPassword) -> Unit) {
 @Preview(showBackground = true)
 @Composable
 fun PreviewLoginScreen() {
-    val state = LoginState(
-        loading = false,
-        email = "joao.joao@gmail",
-        password = "123",
-        currentUser = OperationHandler.Success(User(
-            id = 1,
-            email = "joao",
-            role = "ADMIN"
-        ))
-    )
-    LoginScreen(state) {  }
+    LoginScreen {  }
 }

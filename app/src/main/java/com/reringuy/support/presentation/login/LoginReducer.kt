@@ -3,21 +3,17 @@ package com.reringuy.support.presentation.login
 import com.reringuy.support.helper.OperationHandler
 import com.reringuy.support.helper.Reducer
 import com.reringuy.support.models.entities.User
-import com.reringuy.support.presentation.login.LoginReducer.LoginEffects.OnAuthenticated
 
 class LoginReducer :
     Reducer<LoginReducer.LoginState, LoginReducer.LoginEvents, LoginReducer.LoginEffects> {
     sealed class LoginEvents : Reducer.ViewEvent {
         data class OnLoading(val loading: Boolean) : LoginEvents()
-        data class OnLogin(val email: String, val password: String) : LoginEvents()
         data class LoadUser(val user: OperationHandler<User>) : LoginEvents()
-        data class HandleLogin(val userLogin: OperationHandler<User>) : LoginEvents()
+        data class AuthUser(val user: OperationHandler<User>) : LoginEvents()
     }
 
 
     sealed class LoginEffects : Reducer.ViewEffect {
-        data class OnError(val message: String) : LoginEffects()
-        data object OnAuthenticated : LoginEffects()
         data class LoginError(val message: String) : LoginEffects()
     }
 
@@ -43,14 +39,12 @@ class LoginReducer :
     ): Pair<LoginState, LoginEffects?> = when (event) {
         is LoginEvents.LoadUser -> previousState.copy(currentUser = event.user) to null
         is LoginEvents.OnLoading -> previousState.copy(loading = event.loading) to null
-        is LoginEvents.OnLogin -> previousState.copy(
-            email = event.email,
-            password = event.password
-        ) to OnAuthenticated
-
-        is LoginEvents.HandleLogin -> previousState.copy(currentUser = event.userLogin) to
-                if (event.userLogin is OperationHandler.Error)
-                    LoginEffects.LoginError(event.userLogin.message)
-                else null
+        is LoginEvents.AuthUser -> {
+            previousState.copy(currentUser = event.user) to
+                    if (event.user is OperationHandler.Error)
+                        LoginEffects.LoginError(event.user.message)
+                    else
+                        null
+        }
     }
 }
