@@ -5,7 +5,6 @@ import android.hardware.biometrics.BiometricManager.Authenticators.BIOMETRIC_STR
 import android.hardware.biometrics.BiometricManager.Authenticators.DEVICE_CREDENTIAL
 import android.os.Build
 import android.provider.Settings
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -65,19 +64,17 @@ fun LoginScreenWrapper(
         }
     )
 
-    LaunchedEffect(Unit) {
-        viewModel.loadUser()
-    }
-
     LaunchedEffect(promptResult) {
         when (promptResult) {
             is BiometricResult.AuthenticationError -> {
                 Toast.makeText(context, "Erro de autenticação.", Toast.LENGTH_SHORT).show()
             }
+
             BiometricResult.AuthenticationSuccess -> {
                 Toast.makeText(context, "Autenticado com sucesso.", Toast.LENGTH_SHORT).show()
                 onLogin()
             }
+
             BiometricResult.AuthenticationNotSet -> {
                 if (Build.VERSION.SDK_INT >= 30) {
                     val enrollIntent = Intent(Settings.ACTION_BIOMETRIC_ENROLL).apply {
@@ -89,6 +86,7 @@ fun LoginScreenWrapper(
                     enrollLauncher.launch(enrollIntent)
                 }
             }
+
             null -> {}
             else -> {
                 Toast.makeText(context, "Erro de autenticação.", Toast.LENGTH_SHORT).show()
@@ -110,13 +108,15 @@ fun LoginScreenWrapper(
         is OperationHandler.Error -> {
             LoginScreen(viewModel::onLogin)
         }
+
         is OperationHandler.Success<*> -> {
-            Log.d("prompt", "miau")
-            biometricPromptManager.showBiometricPrompt(
-                title = "Valide identidade",
-                description = "Valide sua identidade para continuar"
-            )
+            if (promptResult == null)
+                biometricPromptManager.showBiometricPrompt(
+                    title = "Valide identidade",
+                    description = "Valide sua identidade para continuar"
+                )
         }
+
         else -> Loading()
     }
 
@@ -215,5 +215,5 @@ fun FormLogin(onClick: (EmailPassword) -> Unit) {
 @Preview(showBackground = true)
 @Composable
 fun PreviewLoginScreen() {
-    LoginScreen {  }
+    LoginScreen { }
 }

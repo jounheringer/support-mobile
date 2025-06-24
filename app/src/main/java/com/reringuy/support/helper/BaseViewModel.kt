@@ -1,6 +1,7 @@
 package com.reringuy.support.helper
 
 import androidx.lifecycle.ViewModel
+import com.reringuy.support.BuildConfig
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,9 +39,9 @@ abstract class BaseViewModel<State: Reducer.ViewState, Event: Reducer.ViewEvent,
 
         val success = _state.tryEmit(newState)
 
-//        if (BuildConfig && success) {
-//            timeCapsule.addState(newState)
-//        }
+        if (BuildConfig.DEBUG && success) {
+            timeCapsule.addState(newState)
+        }
     }
 
     fun sendEventForEffect(event: Event) {
@@ -48,9 +49,9 @@ abstract class BaseViewModel<State: Reducer.ViewState, Event: Reducer.ViewEvent,
 
         val success = _state.tryEmit(newState)
 
-//        if (BuildConfig.isDebug && success) {
-//            timeCapsule.addState(newState)
-//        }
+        if (BuildConfig.DEBUG && success) {
+            timeCapsule.addState(newState)
+        }
 
         effect?.let {
             sendEffect(it)

@@ -5,7 +5,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -47,11 +50,11 @@ fun SupportScaffold() {
         topBar = { SupportTopAppBar() },
         bottomBar = { SupportBottomAppBar() },
         snackbarHost = { SnackbarHost(hostState = snackBarHost) },
-//        floatingActionButton = TODO(),
-//        floatingActionButtonPosition = TODO(),
-//        containerColor = TODO(),
-//        contentColor = TODO(),
-//        contentWindowInsets = TODO()
+        floatingActionButton = {
+            FloatingActionButton(onClick = {}) {
+                Icon(Icons.Rounded.Add, "Adicionar chamado")
+            }
+        }
     ) { innerPadding ->
         Surface(modifier = Modifier.padding(innerPadding)) { }
     }

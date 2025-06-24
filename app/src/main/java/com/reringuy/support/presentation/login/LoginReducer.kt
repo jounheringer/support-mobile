@@ -9,9 +9,7 @@ class LoginReducer :
     sealed class LoginEvents : Reducer.ViewEvent {
         data class OnLoading(val loading: Boolean) : LoginEvents()
         data class LoadUser(val user: OperationHandler<User>) : LoginEvents()
-        data class AuthUser(val user: OperationHandler<User>) : LoginEvents()
     }
-
 
     sealed class LoginEffects : Reducer.ViewEffect {
         data class LoginError(val message: String) : LoginEffects()
@@ -39,12 +37,5 @@ class LoginReducer :
     ): Pair<LoginState, LoginEffects?> = when (event) {
         is LoginEvents.LoadUser -> previousState.copy(currentUser = event.user) to null
         is LoginEvents.OnLoading -> previousState.copy(loading = event.loading) to null
-        is LoginEvents.AuthUser -> {
-            previousState.copy(currentUser = event.user) to
-                    if (event.user is OperationHandler.Error)
-                        LoginEffects.LoginError(event.user.message)
-                    else
-                        null
-        }
     }
 }
