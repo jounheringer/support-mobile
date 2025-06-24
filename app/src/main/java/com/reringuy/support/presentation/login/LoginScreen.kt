@@ -72,7 +72,7 @@ fun LoginScreenWrapper(
 
             BiometricResult.AuthenticationSuccess -> {
                 Toast.makeText(context, "Autenticado com sucesso.", Toast.LENGTH_SHORT).show()
-                onLogin()
+                viewModel.sendEffect(LoginReducer.LoginEffects.BiometricAuthenticated)
             }
 
             BiometricResult.AuthenticationNotSet -> {
@@ -100,6 +100,8 @@ fun LoginScreenWrapper(
                 is LoginReducer.LoginEffects.LoginError -> {
                     Toast.makeText(context, it.message, Toast.LENGTH_SHORT)
                 }
+
+                LoginReducer.LoginEffects.BiometricAuthenticated -> onLogin()
             }
         }
     }

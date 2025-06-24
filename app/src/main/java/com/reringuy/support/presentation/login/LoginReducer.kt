@@ -13,6 +13,7 @@ class LoginReducer :
 
     sealed class LoginEffects : Reducer.ViewEffect {
         data class LoginError(val message: String) : LoginEffects()
+        data object BiometricAuthenticated : LoginEffects()
     }
 
     data class LoginState(
