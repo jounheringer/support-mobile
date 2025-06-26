@@ -1,4 +1,4 @@
-package com.reringuy.support.presentation.login
+package com.reringuy.support.presentation.screens.login
 
 import com.reringuy.support.helper.OperationHandler
 import com.reringuy.support.helper.Reducer

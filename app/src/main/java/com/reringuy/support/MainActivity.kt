@@ -28,7 +28,15 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.reringuy.support.navigation.Destination
+import com.reringuy.support.navigation.NavigationMap
+import com.reringuy.support.presentation.screens.home.HomeScreen
+import com.reringuy.support.presentation.screens.newTask.NewTaskScreen
+import com.reringuy.support.presentation.screens.taskDetails.TaskDetailsScreen
+import com.reringuy.support.presentation.screens.taskList.TaskListScreen
 import com.reringuy.support.presentation.theme.SupportTheme
 
 class MainActivity : ComponentActivity() {
@@ -46,17 +54,28 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun SupportScaffold() {
     val snackBarHost = remember { SnackbarHostState() }
+    val navigationController = rememberNavController()
     Scaffold(
         topBar = { SupportTopAppBar() },
-        bottomBar = { SupportBottomAppBar() },
+        bottomBar = { SupportBottomAppBar { navigationController.navigate(it.route) } },
         snackbarHost = { SnackbarHost(hostState = snackBarHost) },
         floatingActionButton = {
-            FloatingActionButton(onClick = {}) {
+            FloatingActionButton(onClick = { navigationController.navigate(NavigationMap.NewTask) }) {
                 Icon(Icons.Rounded.Add, "Adicionar chamado")
             }
         }
     ) { innerPadding ->
-        Surface(modifier = Modifier.padding(innerPadding)) { }
+        Surface(modifier = Modifier.padding(innerPadding)) {
+            NavHost(
+                navController = navigationController,
+                startDestination = Destination.HOME.route
+            ) {
+                composable<NavigationMap.Home> { HomeScreen() }
+                composable<NavigationMap.TaskList> { TaskListScreen() }
+                composable<NavigationMap.NewTask> { NewTaskScreen() }
+                composable<NavigationMap.TaskDetails> { TaskDetailsScreen() }
+            }
+        }
     }
 }
 
@@ -74,8 +93,7 @@ fun SupportTopAppBar() {
 }
 
 @Composable
-fun SupportBottomAppBar() {
-//    val navController = rememberNavController()
+fun SupportBottomAppBar(navigateTo: (Destination) -> Unit) {
     val startDestination = Destination.HOME
     var selectedDestination by rememberSaveable { mutableIntStateOf(startDestination.ordinal) }
 
@@ -83,7 +101,10 @@ fun SupportBottomAppBar() {
         Destination.entries.forEachIndexed { key, value ->
             NavigationBarItem(
                 selected = selectedDestination == key,
-                onClick = { selectedDestination = key },
+                onClick = {
+                    navigateTo(value)
+                    selectedDestination = key
+                },
                 icon = {
                     Icon(imageVector = value.icon, contentDescription = value.contentDescription)
                 }

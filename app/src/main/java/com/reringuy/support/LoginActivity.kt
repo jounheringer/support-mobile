@@ -6,7 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import com.reringuy.support.auth.biometric.BiometricPromptManager
-import com.reringuy.support.presentation.login.LoginScreenWrapper
+import com.reringuy.support.presentation.screens.login.LoginScreenWrapper
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

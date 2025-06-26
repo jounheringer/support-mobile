@@ -1,11 +1,11 @@
-package com.reringuy.support.presentation.login
+package com.reringuy.support.presentation.screens.login
 
 import androidx.lifecycle.viewModelScope
 import com.reringuy.support.auth.TokenManager
 import com.reringuy.support.helper.BaseViewModel
 import com.reringuy.support.helper.OperationHandler
 import com.reringuy.support.models.data.EmailPassword
-import com.reringuy.support.presentation.login.LoginReducer.LoginEvents
+import com.reringuy.support.presentation.screens.login.LoginReducer.LoginEvents
 import com.reringuy.support.repositories.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch

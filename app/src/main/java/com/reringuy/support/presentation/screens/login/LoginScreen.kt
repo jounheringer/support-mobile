@@ -1,4 +1,4 @@
-package com.reringuy.support.presentation.login
+package com.reringuy.support.presentation.screens.login
 
 import android.content.Intent
 import android.hardware.biometrics.BiometricManager.Authenticators.BIOMETRIC_STRONG
