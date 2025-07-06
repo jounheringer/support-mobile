@@ -1,6 +1,7 @@
 package com.reringuy.support.navigation
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.FormatListBulleted
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.ui.graphics.vector.ImageVector
 import kotlinx.serialization.Serializable
@@ -23,5 +24,5 @@ enum class Destination(
     val route: NavigationMap
 ) {
     HOME(icon = Icons.Filled.Home, contentDescription = "Pagina inicial", route = NavigationMap.Home),
-    Atividades(icon = Icons.Filled.Home, contentDescription = "Minhas atividades", route = NavigationMap.TaskList)
+    ATIVIDADES(icon = Icons.AutoMirrored.Filled.FormatListBulleted, contentDescription = "Minhas atividades", route = NavigationMap.TaskList)
 }

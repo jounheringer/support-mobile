@@ -23,6 +23,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -53,14 +54,21 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun SupportScaffold() {
+    var pageTitle by remember { mutableStateOf(Destination.HOME.route.route) }
     val snackBarHost = remember { SnackbarHostState() }
     val navigationController = rememberNavController()
     Scaffold(
-        topBar = { SupportTopAppBar() },
-        bottomBar = { SupportBottomAppBar { navigationController.navigate(it.route) } },
+        topBar = { SupportTopAppBar(pageTitle) },
+        bottomBar = { SupportBottomAppBar {
+            pageTitle = it.route.route
+            navigationController.navigate(it.route)
+        } },
         snackbarHost = { SnackbarHost(hostState = snackBarHost) },
         floatingActionButton = {
-            FloatingActionButton(onClick = { navigationController.navigate(NavigationMap.NewTask) }) {
+            FloatingActionButton(onClick = {
+                pageTitle = NavigationMap.NewTask.route
+                navigationController.navigate(NavigationMap.NewTask)
+            }) {
                 Icon(Icons.Rounded.Add, "Adicionar chamado")
             }
         }
@@ -81,14 +89,14 @@ fun SupportScaffold() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SupportTopAppBar() {
+fun SupportTopAppBar(pageTitle: String) {
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors().copy(
             containerColor = MaterialTheme.colorScheme.onBackground.copy(0.1f),
             navigationIconContentColor = MaterialTheme.colorScheme.primary,
             actionIconContentColor = MaterialTheme.colorScheme.primary
         ),
-        title = { Text(text = "Bem Vindo") }
+        title = { Text(text = pageTitle) }
     )
 }
 
