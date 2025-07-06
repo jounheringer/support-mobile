@@ -112,7 +112,7 @@ fun LoginScreenWrapper(
         }
 
         is OperationHandler.Success<*> -> {
-            if (promptResult == null)
+            if (promptResult != BiometricResult.AuthenticationSuccess)
                 biometricPromptManager.showBiometricPrompt(
                     title = "Valide identidade",
                     description = "Valide sua identidade para continuar"
